@@ -1,0 +1,8 @@
+Debug/
+Release/
+*.a
+.cproject
+.project
+.settings/
+
+/Default/
