@@ -1,1 +1,4 @@
-BasedOnStyle: WebKit
+# BasedOnStyle: WebKit
+IndentWidth: 4
+AlignConsecutiveDeclarations: true
+AlignTrailingComments: true
