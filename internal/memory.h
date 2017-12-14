@@ -1,6 +1,7 @@
 #ifndef INTERNAL_MEMORY_H
 #define INTERNAL_MEMORY_H
 
+#include "types.h"
 #include <endian.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,11 +29,11 @@
 #define __gen_data_u32__(v) __gen_data_u16__(v >> 16), __gen_data_u16__(v)
 #define __gen_data_u64__(v) __gen_data_u32__(v >> 32), __gen_data_u32__(v)
 #else
-#error "unsupported architecture"
+#error "unsupported endianness"
 #endif
 
-#define __gen_data_f64__(v) __gen_data_u64__(*(u64*)(&v))
-#define __gen_data_f32__(v) __gen_data_u32__(*(u32*)(&v))
+#define __gen_data_f64__(v) __gen_data_u64__(f64_bits(v))
+#define __gen_data_f32__(v) __gen_data_u32__(f32_bits(v))
 
 #define __gen_data_i64__(v) __gen_data_u64__((u64)(v))
 #define __gen_data_i32__(v) __gen_data_u32__((u32)(v))

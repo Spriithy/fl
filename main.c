@@ -8,13 +8,13 @@ int main(void)
         0,
     };
 
-    fatalf("%zu\n", sizeof(v_bytecode));
-
-    u8 data[] = {};
+    u8 data[] = {
+        __gen_data_f32__(0.122),
+    };
 
     // for (size_t i = 0; i < sizeof(data) / sizeof(data[0]); i++)
     //     printf("0x%02x ", data[i]);
-    // printf("0x%x\n", *(u32*)(data));
+    // printf("%f\n", f32_from_bits(*(u32*)data));
 
     v_vm* vm = v_vm_create(512);
     v_vm_load_code(vm, code, sizeof(code));

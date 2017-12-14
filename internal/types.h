@@ -18,4 +18,12 @@ typedef int64_t i64;
 typedef float f32;
 typedef double f64;
 
+/******************************************************************************/
+
+u64 f64_bits(f64 v);
+f64 f64_from_bits(u64 v);
+
+u32 f32_bits(f32 v);
+f32 f32_from_bits(u32 v);
+
 #endif /* types.h */

@@ -9,6 +9,7 @@ add_executable(vexec
         internal/bytecode.h
         internal/common.h
         internal/memory.h
+        internal/types.c
         internal/types.h
         internal/stack/stack.c
         internal/stack/stack.h
