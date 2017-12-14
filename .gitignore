@@ -4,7 +4,11 @@ Release/
 *.o
 .cproject
 .project
-.settings/
+.settings
+.idea
+.vscode
+
+vexec
 
 /Default
 /debug
