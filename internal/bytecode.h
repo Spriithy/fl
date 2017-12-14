@@ -1,6 +1,8 @@
 #ifndef INTERNAL_BYTECODE_H
 #define INTERNAL_BYTECODE_H
 
+/******************************************************************************/
+
 typedef enum {
     Syscall,
     Save,
@@ -18,5 +20,7 @@ typedef enum {
     Const32,
     Const,
 } v_bytecode;
+
+/******************************************************************************/
 
 #endif /* bytecode.h */

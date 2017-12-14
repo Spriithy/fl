@@ -5,6 +5,8 @@
 #include "types.h"
 #include <stdio.h>
 
+/******************************************************************************/
+
 #define fatalf(fmt, ...)                   \
     {                                      \
         fprintf(stderr, fmt, __VA_ARGS__); \
@@ -12,5 +14,7 @@
     }
 
 #define errorf(fmt, ...) fprintf(stderr, fmt, ...)
+
+/******************************************************************************/
 
 #endif /* common.h */

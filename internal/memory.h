@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+/******************************************************************************/
+
 #define v_malloc_check(ptr, msg) \
     if (!(ptr)) {                \
         perror(msg);             \
@@ -17,6 +19,8 @@
         free(ptr);    \
         (ptr) = NULL; \
     }
+
+/******************************************************************************/
 
 #define __gen_data_u8__(v) v & 0xff
 
@@ -39,5 +43,7 @@
 #define __gen_data_i32__(v) __gen_data_u32__((u32)(v))
 #define __gen_data_i16__(v) __gen_data_u16__((u16)(v))
 #define __gen_data_i8__(v) __gen_data_u8__((u8)(v))
+
+/******************************************************************************/
 
 #endif /* memory.h */

@@ -3,37 +3,33 @@
 
 #include "../common.h"
 
+/******************************************************************************/
+
 typedef struct {
     size_t cap;
     size_t size;
-    u8* data;
+    u8*    data;
     union {
         u64* t64;
         u32* t32;
         u16* t16;
-        u8* t8;
+        u8*  t8;
     };
 } v_stack;
 
-/******************************************************************************/
-
 v_stack* v_stack_create(size_t cap);
-void v_stack_dump(v_stack* s);
-void v_stack_destroy(v_stack* s);
-
-/******************************************************************************/
+void     v_stack_dump(v_stack* s);
+void     v_stack_destroy(v_stack* s);
 
 void push_u64(v_stack* s, u64 v);
 void push_u32(v_stack* s, u32 v);
 void push_u16(v_stack* s, u16 v);
 void push_u8(v_stack* s, u8 v);
 
-/******************************************************************************/
-
 u64 pop_u64(v_stack* s);
 u32 pop_u32(v_stack* s);
 u16 pop_u16(v_stack* s);
-u8 pop_u8(v_stack* s);
+u8  pop_u8(v_stack* s);
 
 /******************************************************************************/
 
