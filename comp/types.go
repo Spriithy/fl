@@ -15,10 +15,14 @@ type Type interface {
 	// TypeString returns the bare type representation
 	TypeString() string
 
-	// Kind returns the kind of the type (ie. Void, Pointer, ...)
+	// Kind returns the kind of the type (ie. Unit, Pointer, ...)
 	Kind() TypeKind
 
-	// Id returns the ID of the given type. IDs are most likely to be unique
+	// Id returns the ID of the given type. A type's ID is bound to the underlying
+	// type(s) rather than the type itself. This means that a type alias and its
+	// source share the same TypeID.
+	// This also implies that two structs that have the same memory layout share
+	// the same TypeID.
 	Id() TypeID
 
 	// Equals determines whether two given types are the same or not.
@@ -161,26 +165,32 @@ const (
 /*** UnitType implementation                                                ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *UnitType) Size() int {
 	return 0
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *UnitType) TypeString() string {
 	return unitTypeString
 }
 
+// Kind implements Type
 func (t *UnitType) Kind() TypeKind {
 	return UnitKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *UnitType) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *UnitType) Equals(other Type) bool {
 	return other != nil && other.Kind() == UnitKind
 }
 
+// String implements fmt.Stringer
 func (t *UnitType) String() string {
 	return unitTypeString
 }
@@ -189,6 +199,7 @@ func (t *UnitType) String() string {
 /*** TypeAlias implementation                                               ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *TypeAlias) Size() int {
 	if t.Of == nil {
 		return 0
@@ -197,6 +208,7 @@ func (t *TypeAlias) Size() int {
 	return t.Of.Size()
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *TypeAlias) TypeString() string {
 	switch t.Name {
 	case "":
@@ -210,6 +222,7 @@ func (t *TypeAlias) TypeString() string {
 	}
 }
 
+// Kind implements Type
 func (t *TypeAlias) Kind() TypeKind {
 	if t.Of == nil {
 		return -1
@@ -218,10 +231,12 @@ func (t *TypeAlias) Kind() TypeKind {
 	return t.Of.Kind()
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *TypeAlias) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *TypeAlias) Equals(other Type) bool {
 	if other == nil || t.Of == nil {
 		return false
@@ -230,6 +245,7 @@ func (t *TypeAlias) Equals(other Type) bool {
 	return t.Of.Equals(other)
 }
 
+// String implements fmt.Stringer
 func (t *TypeAlias) String() string {
 	return t.TypeString()
 }
@@ -238,26 +254,32 @@ func (t *TypeAlias) String() string {
 /*** UndefinedType implementation                                           ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *UndefinedType) Size() int {
 	return 0
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *UndefinedType) TypeString() string {
 	return undefTypeString
 }
 
+// Kind implements Type
 func (t *UndefinedType) Kind() TypeKind {
 	return UndefinedKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *UndefinedType) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *UndefinedType) Equals(other Type) bool {
 	return other != nil && other.Kind() == UndefinedKind
 }
 
+// String implements fmt.Stringer
 func (t *UndefinedType) String() string {
 	return undefTypeString
 }
@@ -266,6 +288,7 @@ func (t *UndefinedType) String() string {
 /*** BaseType implementation                                                ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *BaseType) Size() int {
 	switch t.Which {
 	case i8typeID, u8typeID:
@@ -281,18 +304,22 @@ func (t *BaseType) Size() int {
 	return 0
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *BaseType) TypeString() string {
 	return fmt.Sprintf("primitive<%d>", t.Which)
 }
 
+// Kind implements Type
 func (t *BaseType) Kind() TypeKind {
 	return BasicKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *BaseType) Id() TypeID {
 	return t.Which
 }
 
+// Equals implements Type
 func (t *BaseType) Equals(other Type) bool {
 	if other == nil || other.Kind() != BasicKind {
 		return false
@@ -301,6 +328,7 @@ func (t *BaseType) Equals(other Type) bool {
 	return t.Which == other.(*BaseType).Which
 }
 
+// String implements fmt.Stringer
 func (t *BaseType) String() string {
 	if t.Alias != "" {
 		return t.Alias
@@ -313,10 +341,12 @@ func (t *BaseType) String() string {
 /*** PointerType implementation                                             ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *PointerType) Size() int {
 	return Unsigned64.Size()
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *PointerType) TypeString() string {
 	if t.To == nil {
 		return nilTypeReplacement + "&"
@@ -325,14 +355,17 @@ func (t *PointerType) TypeString() string {
 	return t.To.String() + "&"
 }
 
+// Kind implements Type
 func (t *PointerType) Kind() TypeKind {
 	return PointerKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *PointerType) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *PointerType) Equals(other Type) bool {
 	if other == nil || other.Kind() != PointerKind {
 		return false
@@ -341,6 +374,7 @@ func (t *PointerType) Equals(other Type) bool {
 	return t.To.Equals(other.(*PointerType).To)
 }
 
+// String implements fmt.Stringer
 func (t *PointerType) String() string {
 	if t.Alias != "" {
 		return t.Alias
@@ -353,6 +387,7 @@ func (t *PointerType) String() string {
 /*** ArrayType implementation                                               ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *ArrayType) Size() int {
 	if t.Of == nil {
 		return 0
@@ -361,6 +396,7 @@ func (t *ArrayType) Size() int {
 	return t.ElemCount * t.Of.Size()
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *ArrayType) TypeString() string {
 	if t.Of == nil {
 		return fmt.Sprintf("%s[%d]", nilTypeReplacement, t.ElemCount)
@@ -369,14 +405,17 @@ func (t *ArrayType) TypeString() string {
 	return fmt.Sprintf("%s[%d]", t.Of.String(), t.ElemCount)
 }
 
+// Kind implements Type
 func (t *ArrayType) Kind() TypeKind {
 	return ArrayKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *ArrayType) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *ArrayType) Equals(other Type) bool {
 	if other == nil || other.Kind() != ArrayKind {
 		return false
@@ -385,6 +424,7 @@ func (t *ArrayType) Equals(other Type) bool {
 	return t.Id() == other.Id()
 }
 
+// String implements fmt.Stringer
 func (t *ArrayType) String() string {
 	if t.Alias != "" {
 		return t.Alias
@@ -397,6 +437,7 @@ func (t *ArrayType) String() string {
 /*** StructType implementation                                              ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *StructType) Size() int {
 	if t.Fields == nil {
 		return 0
@@ -412,6 +453,7 @@ func (t *StructType) Size() int {
 	return size
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *StructType) TypeString() (repr string) {
 	if t.Fields == nil || len(t.Fields) == 0 {
 		return "struct{}"
@@ -433,14 +475,17 @@ func (t *StructType) TypeString() (repr string) {
 	return repr + "}"
 }
 
+// Kind implements Type
 func (t *StructType) Kind() TypeKind {
 	return StructKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *StructType) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *StructType) Equals(other Type) bool {
 	if other == nil || other.Kind() != StructKind {
 		return false
@@ -449,6 +494,7 @@ func (t *StructType) Equals(other Type) bool {
 	return t.Id() == other.Id()
 }
 
+// String implements fmt.Stringer
 func (t *StructType) String() string {
 	if t.Alias != "" {
 		return "struct " + t.Alias
@@ -461,10 +507,12 @@ func (t *StructType) String() string {
 /*** EnumType implementation                                                ***/
 /******************************************************************************/
 
+// Size implements Type
 func (t *EnumType) Size() int {
 	return Int.Size()
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *EnumType) TypeString() (repr string) {
 	if t.Entries == nil || len(t.Entries) == 0 {
 		return "enum{}"
@@ -482,14 +530,17 @@ func (t *EnumType) TypeString() (repr string) {
 	return repr + "}"
 }
 
+// Kind implements Type
 func (t *EnumType) Kind() TypeKind {
 	return EnumKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *EnumType) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *EnumType) Equals(other Type) bool {
 	if other == nil || other.Kind() != EnumKind {
 		return false
@@ -501,6 +552,7 @@ func (t *EnumType) Equals(other Type) bool {
 	return reflect.DeepEqual(t.Entries, other.(*EnumType).Entries)
 }
 
+// String implements fmt.Stringer
 func (t *EnumType) String() string {
 	if t.Alias != "" {
 		return "enum " + t.Alias
@@ -517,10 +569,12 @@ func (t *EnumType) String() string {
 // that would miss such annotation
 var DefaultFunctionReturnValue = Unit
 
+// Size implements Type
 func (t *FunctionType) Size() int {
 	return Unsigned64.Size()
 }
 
+// TypeString implements Type. It returns the raw string representation of the type
 func (t *FunctionType) TypeString() (repr string) {
 	if t.Args == nil {
 		repr = "()"
@@ -570,14 +624,17 @@ func (t *FunctionType) TypeString() (repr string) {
 	return strings.TrimSpace(repr)
 }
 
+// Kind implements Type
 func (t *FunctionType) Kind() TypeKind {
 	return FunctionKind
 }
 
+// Id implements Type. It returns an ID bound to the raw underlying type
 func (t *FunctionType) Id() TypeID {
 	return hash(t.TypeString())
 }
 
+// Equals implements Type
 func (t *FunctionType) Equals(other Type) bool {
 	if other == nil || other.Kind() != FunctionKind {
 		return false
@@ -586,6 +643,7 @@ func (t *FunctionType) Equals(other Type) bool {
 	return t.Id() == other.Id()
 }
 
+// String implements fmt.Stringer
 func (t *FunctionType) String() string {
 	if t.Alias != "" {
 		return t.Alias
