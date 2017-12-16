@@ -196,6 +196,40 @@ func (t *UnitType) String() string {
 }
 
 /******************************************************************************/
+/*** UndefinedType implementation                                           ***/
+/******************************************************************************/
+
+// Size implements Type
+func (t *UndefinedType) Size() int {
+	return 0
+}
+
+// TypeString implements Type. It returns the raw string representation of the type
+func (t *UndefinedType) TypeString() string {
+	return undefTypeString
+}
+
+// Kind implements Type
+func (t *UndefinedType) Kind() TypeKind {
+	return UndefinedKind
+}
+
+// Id implements Type. It returns an ID bound to the raw underlying type
+func (t *UndefinedType) Id() TypeID {
+	return hash(t.TypeString())
+}
+
+// Equals implements Type
+func (t *UndefinedType) Equals(other Type) bool {
+	return other != nil && other.Kind() == UndefinedKind
+}
+
+// String implements fmt.Stringer
+func (t *UndefinedType) String() string {
+	return undefTypeString
+}
+
+/******************************************************************************/
 /*** TypeAlias implementation                                               ***/
 /******************************************************************************/
 
@@ -248,40 +282,6 @@ func (t *TypeAlias) Equals(other Type) bool {
 // String implements fmt.Stringer
 func (t *TypeAlias) String() string {
 	return t.TypeString()
-}
-
-/******************************************************************************/
-/*** UndefinedType implementation                                           ***/
-/******************************************************************************/
-
-// Size implements Type
-func (t *UndefinedType) Size() int {
-	return 0
-}
-
-// TypeString implements Type. It returns the raw string representation of the type
-func (t *UndefinedType) TypeString() string {
-	return undefTypeString
-}
-
-// Kind implements Type
-func (t *UndefinedType) Kind() TypeKind {
-	return UndefinedKind
-}
-
-// Id implements Type. It returns an ID bound to the raw underlying type
-func (t *UndefinedType) Id() TypeID {
-	return hash(t.TypeString())
-}
-
-// Equals implements Type
-func (t *UndefinedType) Equals(other Type) bool {
-	return other != nil && other.Kind() == UndefinedKind
-}
-
-// String implements fmt.Stringer
-func (t *UndefinedType) String() string {
-	return undefTypeString
 }
 
 /******************************************************************************/
