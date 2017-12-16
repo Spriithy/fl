@@ -48,4 +48,7 @@ var (
 
 	// String represents strings of characters (C-like strings)
 	String = &TypeAlias{"string", &PointerType{"", Byte}}
+
+	// Bool represents the usual boolean values through a 1-byte integer
+	Bool = &TypeAlias{"bool", Unsigned8}
 )
