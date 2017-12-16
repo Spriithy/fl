@@ -25,16 +25,28 @@ func main() {
 	}
 
 	fmt.Printf("%s\n", testStruct.String())
-	fmt.Printf("%s\n", testStruct.TypeString())
+	fmt.Printf("0x%x %s\n", testStruct.Id(), testStruct.TypeString())
 
 	var testFunction virt.Type
 	testFunction = &virt.FunctionType{
 		Alias:   "",
 		Returns: nil,
 		Args: []virt.Type{
-			virt.Int, virt.String,
+			virt.Int, testStruct,
 		},
 	}
 
-	fmt.Printf("%s\n", testFunction.TypeString())
+	fmt.Printf("0x%x %s\n", testFunction.Id(), testFunction.TypeString())
+
+	var testEnum virt.Type
+	testEnum = &virt.EnumType{
+		Alias: "token",
+		Values: map[string]int{
+			"PLUS":  0,
+			"MINUS": 1,
+			"INT":   2,
+		},
+	}
+
+	fmt.Printf("0x%x %s\n", testEnum.Id(), testEnum.TypeString())
 }

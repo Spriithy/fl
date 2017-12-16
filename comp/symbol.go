@@ -12,8 +12,6 @@ type Symbol interface {
 	// The symbol value
 	Text() string
 
-	fmt.Formatter
-
 	// The symbol's type
 	Type() Type
 

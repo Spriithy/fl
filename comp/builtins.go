@@ -1,11 +1,8 @@
 package virt
 
 var (
-	// Void represents the absence of type
-	Void = &VoidType{}
-
 	// Unit represents the absence of type (functional-inspired)
-	Unit = &TypeAlias{"unit", Void}
+	Unit = &UnitType{}
 
 	// Undefined is used to describe symbols which type is not yet known
 	Undefined = &UndefinedType{}

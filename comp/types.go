@@ -2,8 +2,8 @@ package virt
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
-	"unsafe"
 )
 
 // The Type interface is responsible for providing a uniform base for
@@ -18,6 +18,9 @@ type Type interface {
 	// Kind returns the kind of the type (ie. Void, Pointer, ...)
 	Kind() TypeKind
 
+	// Id returns the ID of the given type. IDs are most likely to be unique
+	Id() TypeID
+
 	// Equals determines whether two given types are the same or not.
 	// Two types are equal should their TypeString be the same
 	Equals(Type) bool
@@ -25,8 +28,8 @@ type Type interface {
 	fmt.Stringer
 }
 
-// VoidType represents the absence of type (typeless)
-type VoidType struct{}
+// UnitType represents the absence of type (typeless)
+type UnitType struct{}
 
 // UndefinedType represents the type of undefined values/symbols
 type UndefinedType struct{}
@@ -45,7 +48,7 @@ type BaseType struct {
 	Alias string
 
 	// Which base type (hear primitive) is concerned
-	Which int
+	Which TypeID
 }
 
 // PointerType represents all types that are pointers to other types
@@ -73,6 +76,14 @@ type StructType struct {
 	Fields []Type
 }
 
+// An EnumType represents type enumerations
+type EnumType struct {
+	Alias string
+
+	// The Values (named) of the enum type
+	Values map[string]int
+}
+
 // A FunctionType holds the signature of a function
 type FunctionType struct {
 	Alias string
@@ -86,13 +97,14 @@ type FunctionType struct {
 
 // Compile-time check
 var (
-	_ Type = (*VoidType)(nil)
+	_ Type = (*UnitType)(nil)
 	_ Type = (*UndefinedType)(nil)
 	_ Type = (*TypeAlias)(nil)
 	_ Type = (*BaseType)(nil)
 	_ Type = (*PointerType)(nil)
 	_ Type = (*ArrayType)(nil)
 	_ Type = (*StructType)(nil)
+	_ Type = (*EnumType)(nil)
 	_ Type = (*FunctionType)(nil)
 )
 
@@ -100,18 +112,33 @@ var (
 type TypeKind = int
 
 const (
-	VoidKind TypeKind = iota
+	UnitKind TypeKind = iota
 	UndefinedKind
 	BasicKind
 	PointerKind
 	ArrayKind
 	StructKind
+	EnumKind
 	FunctionKind
 )
 
+// TypeID is used to hold hashes of types to identify them
+type TypeID = uint64
+
+// hash hashes a string using the java.lang.String.hashCode method
+func hash(str string) TypeID {
+	var hash TypeID = 7
+
+	for _, c := range str {
+		hash = hash*31 + TypeID(c)
+	}
+
+	return hash
+}
+
 // These values are used to identify builtin types
 const (
-	u8typeID = iota
+	u8typeID TypeID = iota
 	u16typeID
 	u32typeID
 	u64typeID
@@ -124,38 +151,38 @@ const (
 )
 
 const (
-	voidTypeString      = "void"
-	undefinedTypeString = "undef"
-	funcTypeArrow       = "->"
-	nilTypeReplacement  = "%!(nil)"
+	unitTypeString     = "unit"
+	undefTypeString    = "undef"
+	funcTypeArrow      = "->"
+	nilTypeReplacement = "%!(nil)"
 )
 
 /******************************************************************************/
-/*** VoidType implementation                                                ***/
+/*** UnitType implementation                                                ***/
 /******************************************************************************/
 
-func (t *VoidType) Size() int {
+func (t *UnitType) Size() int {
 	return 0
 }
 
-func (t *VoidType) TypeString() string {
-	return voidTypeString
+func (t *UnitType) TypeString() string {
+	return unitTypeString
 }
 
-func (t *VoidType) Kind() TypeKind {
-	return VoidKind
+func (t *UnitType) Kind() TypeKind {
+	return UnitKind
 }
 
-func (t *VoidType) Equals(other Type) bool {
-	if other == nil {
-		return false
-	}
-
-	return other.Kind() == VoidKind
+func (t *UnitType) Id() TypeID {
+	return hash(t.TypeString())
 }
 
-func (t *VoidType) String() string {
-	return voidTypeString
+func (t *UnitType) Equals(other Type) bool {
+	return other != nil && other.Kind() == UnitKind
+}
+
+func (t *UnitType) String() string {
+	return unitTypeString
 }
 
 /******************************************************************************/
@@ -191,12 +218,12 @@ func (t *TypeAlias) Kind() TypeKind {
 	return t.Of.Kind()
 }
 
-func (t *TypeAlias) Equals(other Type) bool {
-	if other == nil {
-		return false
-	}
+func (t *TypeAlias) Id() TypeID {
+	return hash(t.TypeString())
+}
 
-	if t.Of == nil {
+func (t *TypeAlias) Equals(other Type) bool {
+	if other == nil || t.Of == nil {
 		return false
 	}
 
@@ -216,23 +243,23 @@ func (t *UndefinedType) Size() int {
 }
 
 func (t *UndefinedType) TypeString() string {
-	return undefinedTypeString
+	return undefTypeString
 }
 
 func (t *UndefinedType) Kind() TypeKind {
 	return UndefinedKind
 }
 
-func (t *UndefinedType) Equals(other Type) bool {
-	if other == nil {
-		return false
-	}
+func (t *UndefinedType) Id() TypeID {
+	return hash(t.TypeString())
+}
 
-	return other.Kind() == UndefinedKind
+func (t *UndefinedType) Equals(other Type) bool {
+	return other != nil && other.Kind() == UndefinedKind
 }
 
 func (t *UndefinedType) String() string {
-	return undefinedTypeString
+	return undefTypeString
 }
 
 /******************************************************************************/
@@ -262,16 +289,16 @@ func (t *BaseType) Kind() TypeKind {
 	return BasicKind
 }
 
+func (t *BaseType) Id() TypeID {
+	return t.Which
+}
+
 func (t *BaseType) Equals(other Type) bool {
-	if other == nil {
+	if other == nil || other.Kind() != BasicKind {
 		return false
 	}
 
-	if other.Kind() != BasicKind {
-		return false
-	}
-
-	return t.TypeString() == other.TypeString()
+	return t.Which == other.(*BaseType).Which
 }
 
 func (t *BaseType) String() string {
@@ -287,7 +314,7 @@ func (t *BaseType) String() string {
 /******************************************************************************/
 
 func (t *PointerType) Size() int {
-	return int(unsafe.Sizeof(uintptr(0)))
+	return Unsigned64.Size()
 }
 
 func (t *PointerType) TypeString() string {
@@ -302,16 +329,16 @@ func (t *PointerType) Kind() TypeKind {
 	return PointerKind
 }
 
+func (t *PointerType) Id() TypeID {
+	return hash(t.TypeString())
+}
+
 func (t *PointerType) Equals(other Type) bool {
-	if other == nil {
+	if other == nil || other.Kind() != PointerKind {
 		return false
 	}
 
-	if other.Kind() != PointerKind {
-		return false
-	}
-
-	return t.TypeString() == other.TypeString()
+	return t.To.Equals(other.(*PointerType).To)
 }
 
 func (t *PointerType) String() string {
@@ -346,20 +373,16 @@ func (t *ArrayType) Kind() TypeKind {
 	return ArrayKind
 }
 
+func (t *ArrayType) Id() TypeID {
+	return hash(t.TypeString())
+}
+
 func (t *ArrayType) Equals(other Type) bool {
-	if other == nil {
+	if other == nil || other.Kind() != ArrayKind {
 		return false
 	}
 
-	if other == nil {
-		return false
-	}
-
-	if other.Kind() != ArrayKind {
-		return false
-	}
-
-	return t.TypeString() == other.TypeString()
+	return t.Id() == other.Id()
 }
 
 func (t *ArrayType) String() string {
@@ -414,16 +437,16 @@ func (t *StructType) Kind() TypeKind {
 	return StructKind
 }
 
+func (t *StructType) Id() TypeID {
+	return hash(t.TypeString())
+}
+
 func (t *StructType) Equals(other Type) bool {
-	if other == nil {
+	if other == nil || other.Kind() != StructKind {
 		return false
 	}
 
-	if other.Kind() != StructKind {
-		return false
-	}
-
-	return t.TypeString() == other.TypeString()
+	return t.Id() == other.Id()
 }
 
 func (t *StructType) String() string {
@@ -435,6 +458,58 @@ func (t *StructType) String() string {
 }
 
 /******************************************************************************/
+/*** EnumType implementation                                                ***/
+/******************************************************************************/
+
+func (t *EnumType) Size() int {
+	return Int.Size()
+}
+
+func (t *EnumType) TypeString() (repr string) {
+	if t.Values == nil || len(t.Values) == 0 {
+		return "enum{}"
+	}
+
+	repr = "enum {\n  "
+
+	for name, val := range t.Values {
+		repr += fmt.Sprintf("%s = %d\n  ", name, val)
+	}
+
+	// Remove 2 trailing whitespaces
+	repr = repr[:len(repr)-2]
+
+	return repr + "}"
+}
+
+func (t *EnumType) Kind() TypeKind {
+	return EnumKind
+}
+
+func (t *EnumType) Id() TypeID {
+	return hash(t.TypeString())
+}
+
+func (t *EnumType) Equals(other Type) bool {
+	if other == nil || other.Kind() != EnumKind {
+		return false
+	}
+
+	// Can't use other.Id() == t.Id()
+	// for enum type strings may vary over time (maps are unordered)
+
+	return reflect.DeepEqual(t.Values, other.(*EnumType).Values)
+}
+
+func (t *EnumType) String() string {
+	if t.Alias != "" {
+		return "enum " + t.Alias
+	}
+
+	return fmt.Sprintf("enum <anonymous>[%d]", len(t.Values))
+}
+
+/******************************************************************************/
 /*** FunctionType implementation                                            ***/
 /******************************************************************************/
 
@@ -443,7 +518,7 @@ func (t *StructType) String() string {
 var DefaultFunctionReturnValue = Unit
 
 func (t *FunctionType) Size() int {
-	return int(unsafe.Sizeof(uintptr(0))) // size of pointer
+	return Unsigned64.Size()
 }
 
 func (t *FunctionType) TypeString() (repr string) {
@@ -487,6 +562,8 @@ func (t *FunctionType) TypeString() (repr string) {
 		repr += t.Returns.String()
 	} else {
 		repr += funcTypeArrow + " "
+
+		// TODO nil check
 		repr += DefaultFunctionReturnValue.String()
 	}
 
@@ -497,16 +574,16 @@ func (t *FunctionType) Kind() TypeKind {
 	return FunctionKind
 }
 
+func (t *FunctionType) Id() TypeID {
+	return hash(t.TypeString())
+}
+
 func (t *FunctionType) Equals(other Type) bool {
-	if other == nil {
+	if other == nil || other.Kind() != FunctionKind {
 		return false
 	}
 
-	if other.Kind() != FunctionKind {
-		return false
-	}
-
-	return t.TypeString() == other.TypeString()
+	return t.Id() == other.Id()
 }
 
 func (t *FunctionType) String() string {
