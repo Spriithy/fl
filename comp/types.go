@@ -80,8 +80,8 @@ type StructType struct {
 type EnumType struct {
 	Alias string
 
-	// The Values (named) of the enum type
-	Values map[string]int
+	// The Entries (named) of the enum type
+	Entries map[string]struct{}
 }
 
 // A FunctionType holds the signature of a function
@@ -112,7 +112,7 @@ var (
 type TypeKind = int
 
 const (
-	UnitKind TypeKind = iota
+	UnitKind = iota
 	UndefinedKind
 	BasicKind
 	PointerKind
@@ -466,14 +466,14 @@ func (t *EnumType) Size() int {
 }
 
 func (t *EnumType) TypeString() (repr string) {
-	if t.Values == nil || len(t.Values) == 0 {
+	if t.Entries == nil || len(t.Entries) == 0 {
 		return "enum{}"
 	}
 
 	repr = "enum {\n  "
 
-	for name, val := range t.Values {
-		repr += fmt.Sprintf("%s = %d\n  ", name, val)
+	for name := range t.Entries {
+		repr += fmt.Sprintf("%s\n  ", name)
 	}
 
 	// Remove 2 trailing whitespaces
@@ -498,7 +498,7 @@ func (t *EnumType) Equals(other Type) bool {
 	// Can't use other.Id() == t.Id()
 	// for enum type strings may vary over time (maps are unordered)
 
-	return reflect.DeepEqual(t.Values, other.(*EnumType).Values)
+	return reflect.DeepEqual(t.Entries, other.(*EnumType).Entries)
 }
 
 func (t *EnumType) String() string {
@@ -506,7 +506,7 @@ func (t *EnumType) String() string {
 		return "enum " + t.Alias
 	}
 
-	return fmt.Sprintf("enum <anonymous>[%d]", len(t.Values))
+	return fmt.Sprintf("enum <anonymous>[%d]", len(t.Entries))
 }
 
 /******************************************************************************/
