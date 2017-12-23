@@ -2,16 +2,18 @@ Debug/
 Release/
 *.a
 *.o
+
 .cproject
 .project
 .settings
+
 .idea
+
 .vscode
+flrun/.vscode
 
-vexec
-
-/Default
-/debug
-/release
-/local
-/build
+flrun/default
+flrun/debug
+flrun/release
+flrun/local
+flrun/build

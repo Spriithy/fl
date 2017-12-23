@@ -1,1 +1,0 @@
-clang-5.0 -Wall -Wextra -Werror -g   CMakeFiles/vexec.dir/internal/types.c.o CMakeFiles/vexec.dir/internal/stack/stack.c.o CMakeFiles/vexec.dir/exec/vm.c.o CMakeFiles/vexec.dir/main.c.o  -o vexec 
