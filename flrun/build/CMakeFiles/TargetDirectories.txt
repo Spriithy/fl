@@ -1,0 +1,3 @@
+/home/theophile/dev/c/virt/build/CMakeFiles/rebuild_cache.dir
+/home/theophile/dev/c/virt/build/CMakeFiles/vexec.dir
+/home/theophile/dev/c/virt/build/CMakeFiles/edit_cache.dir
