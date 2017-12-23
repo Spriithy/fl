@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    v_bytecode code[] = {
+    fl_bytecode code[] = {
         Syscall,
         0,
     };
@@ -16,11 +16,11 @@ int main(void)
     //     printf("0x%02x ", data[i]);
     // printf("%f\n", f32_from_bits(*(u32*)data));
 
-    v_vm* vm = v_vm_create(512);
-    v_vm_load_code(vm, code, sizeof(code));
-    v_vm_load_data(vm, data, sizeof(data));
-    v_vm_exec(vm);
-    v_vm_destroy(vm);
+    fl_vm* vm = fl_vm_create(512);
+    fl_vm_load_code(vm, code, sizeof(code));
+    fl_vm_load_data(vm, data, sizeof(data));
+    fl_vm_exec(vm);
+    fl_vm_destroy(vm);
 
     return 0;
 }

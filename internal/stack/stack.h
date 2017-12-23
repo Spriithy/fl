@@ -15,21 +15,21 @@ typedef struct {
         u16* t16;
         u8*  t8;
     };
-} v_stack;
+} fl_stack;
 
-v_stack* v_stack_create(size_t cap);
-void     v_stack_dump(v_stack* s);
-void     v_stack_destroy(v_stack* s);
+fl_stack* fl_stack_create(size_t cap);
+void      fl_stack_dump(fl_stack* s);
+void      fl_stack_destroy(fl_stack* s);
 
-void push_u64(v_stack* s, u64 v);
-void push_u32(v_stack* s, u32 v);
-void push_u16(v_stack* s, u16 v);
-void push_u8(v_stack* s, u8 v);
+void push_u64(fl_stack* s, u64 v);
+void push_u32(fl_stack* s, u32 v);
+void push_u16(fl_stack* s, u16 v);
+void push_u8(fl_stack* s, u8 v);
 
-u64 pop_u64(v_stack* s);
-u32 pop_u32(v_stack* s);
-u16 pop_u16(v_stack* s);
-u8  pop_u8(v_stack* s);
+u64 pop_u64(fl_stack* s);
+u32 pop_u32(fl_stack* s);
+u16 pop_u16(fl_stack* s);
+u8  pop_u8(fl_stack* s);
 
 /******************************************************************************/
 
@@ -50,4 +50,4 @@ u8  pop_u8(v_stack* s);
                             : push_f64, f32 \
                             : push_f32)(s, v)
 
-#endif /* v_stack.h */
+#endif /* fl_stack.h */

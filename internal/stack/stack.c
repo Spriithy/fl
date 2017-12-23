@@ -6,7 +6,7 @@ v_stack* v_stack_create(size_t cap)
     v_stack* s = malloc(sizeof(*s));
     v_malloc_check(s, "v_stack.load()");
 
-    s->cap = cap;
+    s->cap  = cap;
     s->size = 0;
 
     s->data = malloc(cap);

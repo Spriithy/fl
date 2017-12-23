@@ -8,14 +8,14 @@
 
 /******************************************************************************/
 
-#define v_malloc_check(ptr, msg) \
-    if (!(ptr)) {                \
-        perror(msg);             \
-        exit(-1);                \
+#define fl_malloc_check(ptr, msg) \
+    if (!(ptr)) {                 \
+        perror(msg);              \
+        exit(-1);                 \
     }
 
-#define v_free(ptr)   \
-    if (ptr) {        \
+#define fl_free(ptr)  \
+    {                 \
         free(ptr);    \
         (ptr) = NULL; \
     }
