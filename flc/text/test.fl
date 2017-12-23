@@ -1,0 +1,8 @@
+(* The Maybe Monad *)
+type Maybe a
+    = Some a
+    | Nothing
+
+(* main function *)
+func main () unit =
+    func x -> x + 1.0
